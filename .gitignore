@@ -1,0 +1,25 @@
+#Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+#Virtual environment
+atmos_env_311/
+
+# generated outputs and data
+
+outputs_step5/
+data/
+
+#macOS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+#Model checkpoints
+*.pt
+*.pth
+*.h5
+
