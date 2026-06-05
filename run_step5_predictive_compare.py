@@ -200,7 +200,7 @@ def simulate_operational_period(zernike_seq, cn2_seq,
 
     for i in range(T - WINDOW_SIZE):
         t    = i + WINDOW_SIZE
-        Cn2  = float(cn2_seq[t])   # Bug A fix: use actual trajectory Cn2
+        Cn2  = float(cn2_seq[t])   
         dist = DISTANCE_KM
 
         # Unprotected baseline
@@ -214,12 +214,11 @@ def simulate_operational_period(zernike_seq, cn2_seq,
         # AI-predictive: TCN looks ahead and pre-compensates
         window     = zernike_seq[i : i + WINDOW_SIZE]
         pred_coeff = predict_next_zernike(
-            model, window, device, Cn2=Cn2)   # Bug A fix: pass Cn2
+            model, window, device, Cn2=Cn2)   
 
         pred_rms    = zernike_rms(pred_coeff)
         current_rms = zernike_rms(zernike_seq[t])
 
-        # Bug B fix: MMSE-optimal correction, not arbitrary 0.5
         # γ* controls how much weight goes to the TCN prediction.
         # When pred_rms < current_rms the TCN expects calmer conditions
         # ahead — the system pre-compensates by that fraction.
