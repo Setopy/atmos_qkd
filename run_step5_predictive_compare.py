@@ -1,30 +1,7 @@
 """
 run_step5_predictive_compare.py
 --------------------------------
-Step 5: predictive AI vs reactive physics — the final result.
 
-Three bugs present in the original version are corrected here:
-
-  Bug A — wrong Cn2 at inference
-      predict_next_zernike() was called with the constant CN2_MEDIUM
-      for every timestep regardless of the trajectory value. Fixed:
-      the actual cn2_seq[t] is now passed at each step.
-
-  Bug B — arbitrary 0.5 correction factor
-      The correction formula used 0.5 as a hard-coded engineering
-      guess. Replaced with the MMSE-optimal γ* derived from the
-      Wiener filter:  γ* = σ²_atm / (σ²_pred + σ²_atm).
-      σ²_pred comes from the checkpoint's stored test_loss.
-      σ²_atm is computed from the trajectory's Zernike RMS variance.
-
-  Bug C — single seed produces a non-publishable point estimate
-      The original ran on seed=9999 only. Now runs across N_SEEDS=20
-      independent trajectories and reports mean ± std. The box-plot
-      summary figure is the publishable result.
-
-Run from the directory that contains atmos_qkd/:
-    python3 atmos_qkd/run_step5_predictive_compare.py
-"""
 
 import sys
 import os
