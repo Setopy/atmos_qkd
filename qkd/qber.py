@@ -17,8 +17,7 @@ The 2/3 factor for the protected case is the exact result of the
 correlated twirling protocol derived in Papon et al. (2025).
 Averaging over the 12-element unitary 2-design symmetrises the
 directional rotation error into an isotropic depolarising channel,
-reducing the effective error rate by this constant factor. The
-full derivation is in Appendix B of that paper.
+reducing the effective error rate by this constant factor. 
 """
 
 import numpy as np
@@ -57,7 +56,7 @@ def _qber_from_trans(trans, noise_std, protected):
     # The twirling protocol converts the deterministic directional
     # rotation into isotropic depolarising noise. The 2/3 factor is
     # the exact analytical result from Schur's lemma applied to the
-    # 12-element unitary 2-design. See Appendix B of Papon et al. (2025).
+    # 12-element unitary 2-design.
     if protected:
         intr_err *= (2.0 / 3.0)
 

@@ -25,6 +25,7 @@ Andrews, L.C. and Phillips, R.L. (2005). Laser Beam Propagation through
     Random Media. SPIE Press.
 """
 
+import warnings
 import numpy as np
 from atmos_qkd.constants import WAVELENGTH, APERTURE_D, ALPHA_ABS_CLEAR
 
@@ -69,19 +70,20 @@ def get_fried_parameter(Cn2, distance, wavelength=WAVELENGTH):
 
 def get_strehl_ratio(r0, D=APERTURE_D):
     """
-    Strehl ratio — fraction of beam power within the
-    diffraction-limited focal spot after passing through turbulence.
+    Strehl ratio via the Marechal approximation.
 
-    A Strehl ratio of 1.0 means the wavefront is perfect and all
-    collected power reaches the detector. A Strehl ratio of 0.1
-    means 90 percent of power is scattered into the surrounding halo
-    and does not contribute to the signal.
+    The Marechal approximation  S ≈ exp(-1.03 × (D/r0)^(5/3))  is
+    derived by expanding the focal-plane intensity for small wavefront
+    aberrations. It is accurate when D/r0 is not large — typically
+    taken as valid for D/r0 ≲ 3. Beyond that the true Strehl requires
+    numerical integration of the aberrated pupil function.
 
-    The Marechal approximation used here is valid for moderate
-    turbulence where D/r0 is not extreme (roughly below 10). It
-    relates the wavefront variance to the intensity at the focal
-    point through the exponential function. The exponent 5/3 is a
-    direct consequence of the Kolmogorov turbulence spectrum.
+    A RuntimeWarning is issued when D/r0 > 3 so that simulation
+    results from strong-turbulence regimes are not silently accepted
+    as if the approximation still holds. At D/r0 = 10 the Marechal
+    value is optimistic by a factor of roughly 2-4× compared to the
+    exact Strehl; at D/r0 = 45 (Cn2=1e-13 at 10 km) the link is
+    effectively broken and any formula gives numbers near zero.
 
     Parameters
     ----------
@@ -95,7 +97,19 @@ def get_strehl_ratio(r0, D=APERTURE_D):
     if r0 <= 0:
         return 0.0
 
-    strehl = np.exp(-1.03 * (D / r0) ** (5.0 / 3.0))
+    ratio = D / r0
+
+    if ratio > 3.0:
+        warnings.warn(
+            f"Marechal approximation validity exceeded: "
+            f"D/r0 = {ratio:.1f}  (reliable range: D/r0 ≤ 3). "
+            f"The returned Strehl ratio may be optimistic. "
+            f"Consider capping Cn2 at ≈1e-14 for 10 km links.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+    strehl = np.exp(-1.03 * ratio ** (5.0 / 3.0))
     return float(np.clip(strehl, 0.0, 1.0))
 
 
@@ -170,8 +184,7 @@ def get_absorption_loss(distance, wavelength=WAVELENGTH):
 def get_atmospheric_trans(distance, Cn2,
                           D=APERTURE_D, wavelength=WAVELENGTH):
     """
-    Total atmospheric transmittance — the direct replacement for
-        trans = 10 ** (-(0.2 * distance) / 10)
+    Total atmospheric transmittance.
 
     Combines turbulence, diffraction, and absorption losses by
     multiplication. Each mechanism operates independently on the
